@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { framesOf, thumbOf } from "../src/lib/view.ts";
 import { STORIES } from "../src/stories/index.ts";
+import { validateStory } from "../tools/story-rules.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const spotsOf = (look) => (!look || look === "all" ? [] : Array.isArray(look) ? look : [look]);
 
 test("故事 id 唯一，只用小写字母、数字和短横线", () => {
   const ids = STORIES.map((s) => s.id);
@@ -21,55 +19,16 @@ test("故事从早到晚排", () => {
 });
 
 for (const story of STORIES) {
-  test(`${story.id}：图片和缩略图都在 public/ 下`, () => {
-    for (const { src } of framesOf(story)) assert.ok(existsSync(join(root, "public", src)), `缺 public/${src}，跑 npm run frames`);
-    const thumb = thumbOf(story.frame.src);
-    assert.ok(existsSync(join(root, "public", thumb)), `缺 public/${thumb}，跑 npm run frames`);
-  });
-
-  test(`${story.id}：图片来源和坐标写清楚`, () => {
-    for (const [i, frame] of framesOf(story).entries()) {
-      assert.ok(frame.by && frame.license && frame.alt, `${frame.src}：要写 by、license、alt`);
-      if (i > 0) assert.ok(frame.title, `${frame.src}：中途换上的图要写 title`);
-      assert.match(frame.page, /^https:\/\//);
-      if (frame.commons) assert.match(frame.commons, /^File:/);
-    }
-    const [lat, lon] = story.coords;
-    assert.ok(lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180, "经纬度有效");
-    assert.ok(story.sources.length > 0, "至少一条参考资料");
-    for (const s of story.sources) assert.match(s.url, /^https:\/\//, s.title);
-  });
-
-  test(`${story.id}：小念先开口，问答句数与字数合规`, () => {
-    const [first] = story.lines;
-    assert.equal(first.who, "nian");
-    assert.ok(first.part, "第一句要开一段");
-    assert.ok(story.lines.length >= 16, "太短了");
-    assert.ok(story.lines.some((l) => l.who === "nian"));
-    assert.ok(story.lines.some((l) => l.who === "dad"));
-    for (const [i, l] of story.lines.entries()) {
-      assert.ok(l.say.trim(), `第 ${i + 1} 句是空的`);
-      assert.ok(l.say.length <= 160, `第 ${i + 1} 句 ${l.say.length} 个字，拆成两句`);
-    }
-  });
-
-  test(`${story.id}：圈都在图里面且至少指两处`, () => {
-    let pointed = 0;
-    for (const [i, l] of story.lines.entries()) {
-      for (const s of spotsOf(l.look)) {
-        pointed++;
-        const where = `第 ${i + 1} 句`;
-        assert.ok(s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1, `${where}：圈心要在 0~1 之间`);
-        assert.ok(s.r > 0 && s.r <= 0.5, `${where}：半径要在 0~0.5 之间`);
-        if (s.zoom !== undefined) assert.ok(s.zoom >= 1 && s.zoom <= 6, `${where}：zoom 在 1~6 之间`);
-      }
-    }
-    assert.ok(pointed >= 2, "至少要在图上指两处");
-  });
-
-  test(`${story.id}：结尾有一句话记住和小档案`, () => {
-    assert.ok(story.remember.trim());
-    assert.ok(story.facts.length >= 3);
-    assert.ok(story.teaser.trim() && story.when.trim() && story.person.trim() && story.place.trim());
+  test(`${story.id}：符合内容、坐标、图片与问答规则`, () => {
+    assert.deepEqual(validateStory(story, root), []);
   });
 }
+
+test("校验器能拦截越界 journey 与缺少 note 的示意图", () => {
+  const base = structuredClone(STORIES[0]);
+  base.journey = [95, 0];
+  base.frame = { ...base.frame, kind: "示意图", note: "" };
+  const errs = validateStory(base);
+  assert.ok(errs.some((e) => e.includes("journey")));
+  assert.ok(errs.some((e) => e.includes("示意图")));
+});

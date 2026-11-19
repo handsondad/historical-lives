@@ -18,8 +18,25 @@ function voiceFor(who: Speaker): SpeechSynthesisVoice | undefined {
     ?? zh[0];
 }
 
-/** 念一句；有配好的音频就放音频，放不了再用浏览器朗读。念完时调 onEnd，返回停止函数 */
-export function speak(who: Speaker, text: string, onEnd: () => void, clip?: string): () => void {
+const preloaded = new Set<string>();
+
+/** 预加载下一句音频，减少跨境网络下句与句之间的等待 */
+export function preloadClip(clip?: string) {
+  if (!clip || typeof Audio === "undefined" || preloaded.has(clip)) return;
+  preloaded.add(clip);
+  const audio = new Audio();
+  audio.preload = "auto";
+  audio.src = clip;
+}
+
+/** 念一句；有配好的音频就放音频，放不了再用浏览器朗读。念完时调 onEnd，被拦截时调 onBlocked，返回停止函数 */
+export function speak(
+  who: Speaker,
+  text: string,
+  onEnd: () => void,
+  clip?: string,
+  onBlocked?: () => void,
+): () => void {
   if (!clip) return synth(who, text, onEnd);
   const audio = new Audio(clip);
   let stopped = false;
@@ -32,7 +49,9 @@ export function speak(who: Speaker, text: string, onEnd: () => void, clip?: stri
   };
   audio.onerror = fallback;
   audio.play().catch((err: unknown) => {
-    if (!(err instanceof DOMException && err.name === "NotAllowedError")) fallback();
+    if (stopped) return;
+    if (err instanceof DOMException && err.name === "NotAllowedError") onBlocked?.();
+    else fallback();
   });
   return () => {
     stopped = true;

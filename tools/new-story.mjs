@@ -47,6 +47,7 @@ export const ${varName}: Story = {
     commons: "File:Example.jpg",
     page: "https://commons.wikimedia.org/wiki/File:Example.jpg",
   },
+  // 至少写满 16 句问答（每句 <= 160 字），第一句由小念从图上看得见的东西问起
   lines: [
     nian("爸爸，这张图上的……", { part: "初见", face: "curious" }),
     dad("这是……", { look: mainSpot }),

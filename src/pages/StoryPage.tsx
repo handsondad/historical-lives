@@ -2,15 +2,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Avatar, inferExpression } from "../components/Avatar.tsx";
 import { FrameStage } from "../components/FrameStage.tsx";
 import { WorldPin } from "../components/WorldPin.tsx";
-import { canSpeak, speak } from "../lib/speech.ts";
+import { markRead } from "../lib/progress.ts";
+import { canSpeak, preloadClip, speak } from "../lib/speech.ts";
 import { framesOf, resolveFrames, resolveLooks } from "../lib/view.ts";
 import { clipUrl } from "../lib/voice.ts";
 import { eraMeta, eraOf, yearText } from "../lib/year.ts";
 import { STORIES } from "../stories/index.ts";
 import type { Speaker, Story } from "../stories/types.ts";
+import { lineMemory } from "./lineMemory.ts";
 
 const NAME: Record<Speaker, string> = { nian: "小念", dad: "爸爸" };
 const PAUSE = 650;
+
+function groupKeyFor(story: Story, mode: typeof lineMemory.mode): string {
+  if (mode === "era") return `era:${eraOf(story.year)}`;
+  if (mode === "region") return `region:${story.region}`;
+  return `field:${story.field}`;
+}
 
 export function StoryPage({ story, initialStep }: { story: Story; initialStep: number }) {
   const looks = useMemo(() => resolveLooks(story.lines), [story]);
@@ -21,10 +29,20 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
   const [step, setStep] = useState(initialStep);
   const [pinned, setPinned] = useState<number | null>(null);
   const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const shownLine = pinned ?? step;
   const frame = frames[shownLine];
   const done = step >= last;
   const hasClips = useMemo(() => story.lines.some((l) => clipUrl(story.id, l)), [story]);
+
+  useEffect(() => {
+    lineMemory.open = groupKeyFor(story, lineMemory.mode);
+    lineMemory.picked = `s:${story.id}`;
+  }, [story]);
+
+  useEffect(() => {
+    if (done) markRead(story.id);
+  }, [done, story.id]);
 
   useEffect(() => {
     history.replaceState(null, "", `#/story/${story.id}/${step + 1}`);
@@ -35,17 +53,44 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
     setStep(Math.max(0, Math.min(last, to)));
   }, [last]);
 
+  const toggleListen = useCallback(() => {
+    setListening((prev) => {
+      if (!prev && step >= last) {
+        setPinned(null);
+        setStep(0);
+      }
+      return !prev;
+    });
+  }, [step, last]);
+
   useEffect(() => {
-    if (!listening) return;
+    if (!listening) {
+      setSpeaking(false);
+      return;
+    }
     const line = story.lines[step];
+    const nextLine = story.lines[step + 1];
+    if (nextLine) preloadClip(clipUrl(story.id, nextLine));
     let timer = 0;
-    const stop = speak(line.who, line.say, () => {
-      if (step >= last) setListening(false);
-      else timer = window.setTimeout(() => go(step + 1), PAUSE);
-    }, clipUrl(story.id, line));
+    setSpeaking(true);
+    const stop = speak(
+      line.who,
+      line.say,
+      () => {
+        setSpeaking(false);
+        if (step >= last) setListening(false);
+        else timer = window.setTimeout(() => go(step + 1), PAUSE);
+      },
+      clipUrl(story.id, line),
+      () => {
+        setSpeaking(false);
+        setListening(false);
+      },
+    );
     return () => {
       stop();
       clearTimeout(timer);
+      setSpeaking(false);
     };
   }, [listening, step, story, last, go]);
 
@@ -55,7 +100,9 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.target instanceof HTMLElement && e.target.closest("a, input, textarea, summary")) return;
+      if (e.key === " " && e.target instanceof HTMLButtonElement) return;
       if (e.key === "ArrowRight" || e.key === " ") {
         e.preventDefault();
         go(step + 1);
@@ -87,7 +134,7 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
         <span className="topbar-title"><span className="yr">{yearText(story)}</span>{story.person}</span>
         {(canSpeak() || hasClips) && (
           <button type="button" className={listening ? "btn play small on" : "btn play small"} aria-pressed={listening}
-            onClick={() => setListening((v) => !v)}>
+            onClick={toggleListen}>
             {listening ? "■ 停下" : "▶ 听问答"}
           </button>
         )}
@@ -116,19 +163,29 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
               <span>· {story.region} · {story.lifeSpan}</span>
             </p>
             <h1>{story.title}</h1>
+            <details className="mobile-stage-meta">
+              <summary>📍 {story.place}{frame.note ? " · 查看图注与地图" : " · 查看世界坐标"}</summary>
+              {frame.note && <p className="mobile-frame-note">{frame.note}</p>}
+              <WorldPin place={story.place} region={story.region} coords={story.coords} journey={story.journey} compact />
+            </details>
           </header>
 
           <ol className="talk">
             {story.lines.slice(0, step + 1).map((line, i) => {
               const face = line.face ?? inferExpression(line.who, line.say);
-              const talking = listening && i === step;
+              const talking = speaking && i === step;
               return (
                 <li key={i} ref={i === step ? latest : undefined}>
                   {line.part && <h2 className="part"><span>{line.part}</span></h2>}
                   <button type="button"
-                    className={`say ${line.who}${i === shownLine ? " current" : ""}${looks[i].length ? " points" : ""}`}
-                    onClick={() => (i === step ? go(step + 1) : setPinned(i === pinned ? null : i))}
-                    aria-label={`${NAME[line.who]}：${line.say}`}>
+                    className={`say ${line.who}${i === shownLine ? " current" : ""}${looks[i].length ? " points" : ""}${talking ? " speaking" : ""}`}
+                    onClick={() => {
+                      if (i === step) go(step + 1);
+                      else {
+                        setListening(false);
+                        setPinned(i === pinned ? null : i);
+                      }
+                    }}>
                     <span className="who" aria-hidden="true">
                       <Avatar who={line.who} face={face} talking={talking} />
                     </span>
@@ -188,6 +245,7 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
               : <button type="button" className="btn" onClick={() => go(step + 1)}>下一句</button>}
             <button type="button" className="link-btn" onClick={() => go(last)} disabled={done}>全部展开</button>
           </div>
+          <p className="talk-hint">按 ← → 翻句 · 点前面气泡可回看图上圈点</p>
         </section>
       </div>
     </div>

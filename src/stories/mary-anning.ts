@@ -71,6 +71,7 @@ export const maryAnning: Story = {
   ],
   sources: [
     { title: "Wikimedia Commons：Mary Anning painting", url: "https://commons.wikimedia.org/wiki/File:Mary_Anning_painting.jpg" },
+    { title: "Wikimedia Commons：Duria Antiquior (Henry De la Beche, 1830)", url: "https://commons.wikimedia.org/wiki/File:Duria_Antiquior.jpg" },
     { title: "Natural History Museum：Mary Anning, the unsung hero of fossil discovery", url: "https://www.nhm.ac.uk/discover/mary-anning-unsung-hero.html" },
   ],
 };

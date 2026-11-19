@@ -4,10 +4,10 @@ const INK = "#3d3027";
 const EYE = "#2b201a";
 const MOUTH = "#b5413a";
 
-/** 没手写 face 时，按台词末尾标点挑一个自然表情 */
+/** 没手写 face 时，按台词末尾标点挑一个自然表情（爸爸感叹句默认沉稳，避免严肃史实出现违和笑脸） */
 export function inferExpression(who: Speaker, text: string): Expression {
   if (/[？?]\s*$/.test(text)) return "curious";
-  if (/[！!]\s*$/.test(text)) return who === "nian" ? "surprised" : "happy";
+  if (/[！!]\s*$/.test(text)) return who === "nian" ? "surprised" : "neutral";
   if (/……|\.\.\./.test(text)) return "thinking";
   return who === "dad" ? "neutral" : "happy";
 }
@@ -70,6 +70,17 @@ export function Avatar({ who, face = "neutral", talking = false }: Props) {
           fill={hair}
           stroke={INK}
           strokeWidth={7}
+          strokeLinejoin="round"
+        />
+      )}
+
+      {/* proud 表情配一颗小星星（对照 storyverse 的 sparkle 标记，与 happy 区分） */}
+      {face === "proud" && (
+        <path
+          d="M 78,-78 L 83,-65 L 96,-60 L 83,-55 L 78,-42 L 73,-55 L 60,-60 L 73,-65 Z"
+          fill="#ffd166"
+          stroke={INK}
+          strokeWidth={4}
           strokeLinejoin="round"
         />
       )}
@@ -159,13 +170,23 @@ function BrowPair({ face, hair }: { face: Expression; hair: string }) {
 
 function MouthShape({ face, talking }: { face: Expression; talking: boolean }) {
   if (talking) {
-    return <path d="M -11,30 Q 0,48 11,30 Q 0,27 -11,30 Z" fill={MOUTH} stroke={INK} strokeWidth={5} strokeLinejoin="round" />;
+    return (
+      <g className="avatar-mouth-talk">
+        <path d="M -11,30 Q 0,48 11,30 Q 0,27 -11,30 Z" fill={MOUTH} stroke={INK} strokeWidth={5} strokeLinejoin="round" />
+        <ellipse cx={0} cy={38} rx={4.5} ry={2.4} fill="#ff8f8f" />
+      </g>
+    );
   }
   if (face === "surprised") {
     return <ellipse cx={0} cy={35} rx={7} ry={9} fill={MOUTH} stroke={INK} strokeWidth={5} />;
   }
   if (face === "happy" || face === "proud") {
-    return <path d="M -15,29 Q 0,48 15,29 Q 0,32 -15,29 Z" fill={MOUTH} stroke={INK} strokeWidth={5} strokeLinejoin="round" />;
+    return (
+      <g>
+        <path d="M -15,29 Q 0,48 15,29 Q 0,32 -15,29 Z" fill={MOUTH} stroke={INK} strokeWidth={5} strokeLinejoin="round" />
+        <ellipse cx={0} cy={39} rx={5.5} ry={2.5} fill="#ff8f8f" />
+      </g>
+    );
   }
   if (face === "curious" || face === "thinking") {
     return <path d="M -6,34 Q 3,37 11,31" fill="none" stroke={INK} strokeWidth={5.5} strokeLinecap="round" />;

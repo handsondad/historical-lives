@@ -29,7 +29,7 @@ shots.forEach((file, i) => copyFileSync(file, join(tmp, `${String(i).padStart(2,
 const out = join(root, "snapshots", `${id}-sheet.png`);
 const rows = Math.ceil(steps.length / 4);
 execFileSync("ffmpeg", ["-loglevel", "error", "-y", "-i", join(tmp, "%02d.png"),
-  "-vf", `crop=620:620:12:62,scale=400:-1,tile=4x${rows}`, "-frames:v", "1", out]);
+  "-vf", `crop=620:596:12:64,scale=400:-1,tile=4x${rows}`, "-frames:v", "1", out]);
 rmSync(tmp, { recursive: true, force: true });
 console.log(out);
 console.log(`从左上往右依次是第 ${steps.join("、")} 句`);

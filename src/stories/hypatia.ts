@@ -72,6 +72,7 @@ export const hypatia: Story = {
   ],
   sources: [
     { title: "Wikimedia Commons：Hypatia portrait", url: "https://commons.wikimedia.org/wiki/File:Hypatia_portrait.png" },
+    { title: "Wikimedia Commons：Astrolabe-Persian-18C", url: "https://commons.wikimedia.org/wiki/File:Astrolabe-Persian-18C.jpg" },
     { title: "Britannica：Hypatia", url: "https://www.britannica.com/biography/Hypatia" },
     { title: "MacTutor History of Mathematics：Hypatia of Alexandria", url: "https://mathshistory.st-andrews.ac.uk/Biographies/Hypatia/" },
   ],
