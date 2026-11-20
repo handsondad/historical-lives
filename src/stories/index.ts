@@ -7,6 +7,14 @@ import { ramanujan } from "./ramanujan.ts";
 import { shackletonEndurance } from "./shackleton-endurance.ts";
 import { sorJuana } from "./sor-juana.ts";
 import type { Story } from "./types.ts";
+import { tagore } from "./tagore.ts";
+import { marySeacole } from "./mary-seacole.ts";
+import { olaudahEquiano } from "./olaudah-equiano.ts";
+import { edwardJenner } from "./edward-jenner.ts";
+import { songYingxing } from "./song-yingxing.ts";
+import { zhengHe } from "./zheng-he.ts";
+import { alKhwarizmi } from "./al-khwarizmi.ts";
+import { ashoka } from "./ashoka.ts";
 import { wangariMaathai } from "./wangari-maathai.ts";
 import { ameliaEarhart } from "./amelia-earhart.ts";
 import { beethoven } from "./beethoven.ts";
@@ -34,6 +42,14 @@ export const STORIES: readonly Story[] = [
   beethoven,
   ameliaEarhart,
   wangariMaathai,
+  ashoka,
+  alKhwarizmi,
+  zhengHe,
+  songYingxing,
+  edwardJenner,
+  olaudahEquiano,
+  marySeacole,
+  tagore,
 ].sort((a, b) => a.year - b.year);
 
 export const storyById = (id: string) => STORIES.find((s) => s.id === id);

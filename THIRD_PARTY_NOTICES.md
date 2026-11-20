@@ -28,6 +28,19 @@
 | 阿梅莉亚·埃尔哈特（红飞机） | `frames/amelia-earhart-vega.jpg` | Eric Long / 史密森尼国家航空航天博物馆 | CC0 | https://commons.wikimedia.org/wiki/File:Lockheed_Vega_5B,_Amelia_Earhart_-_Transatlantikflug.jpg |
 | 旺加里·马塔伊 | `frames/wangari-maathai.jpg` | Antônio Cruz / Agência Brasil (2006) | CC BY 3.0 BR | https://commons.wikimedia.org/wiki/File:Wangari_Maathai_no_Brasil.jpg |
 | 旺加里·马塔伊（卡鲁拉森林） | `frames/wangari-maathai-forest.jpg` | Mekami (2019) / 卡鲁拉森林 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Karura_forest_path.jpg |
+| 阿育王 | `frames/ashoka.jpg` | Chrisi1964 (2011) / 萨尔纳特考古博物馆 | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Sarnath_capital.jpg |
+| 花剌子密 | `frames/al-khwarizmi.jpg` | 《代数学》抄本 MS. Huntington 214（约 1342 年）/ 牛津大学博德利图书馆 | 公有领域 | https://commons.wikimedia.org/wiki/File:Bodleian_MS._Huntington_214_roll332_frame36.jpg |
+| 郑和 | `frames/zheng-he.jpg` | 传为沈度题绘《瑞应麒麟图》/ 费城艺术博物馆 | 公有领域 | https://commons.wikimedia.org/wiki/File:Tribute_Giraffe_with_Attendant.jpg |
+| 郑和（航海图） | `frames/zheng-he-map.jpg` | 茅元仪《武备志》（1621） | 公有领域 | https://commons.wikimedia.org/wiki/File:Mao_Kun_map_-_Ceylon,_Africa.png |
+| 宋应星 | `frames/song-yingxing.jpg` | 宋应星《天工开物》花机图（1637） | 公有领域 | https://commons.wikimedia.org/wiki/File:%E5%A4%A9%E5%B7%A5%E9%96%8B%E7%89%A9_%E8%8A%B1%E6%A9%9F%E5%9C%96_2.jpg |
+| 宋应星（牛转翻车） | `frames/song-yingxing-water.jpg` | 宋应星《天工开物》水力图（1637） | 公有领域 | https://commons.wikimedia.org/wiki/File:%E5%A4%A9%E5%B7%A5%E9%96%8B%E7%89%A9_%E6%B0%B4%E5%8A%9B%E5%9C%96.jpg |
+| 爱德华·琴纳 | `frames/edward-jenner.jpg` | Ernest Board (c. 1910) / Wellcome Collection | 公有领域 | https://commons.wikimedia.org/wiki/File:Jenner_phipps_01_(cropped).jpg |
+| 爱德华·琴纳（粉彩肖像） | `frames/edward-jenner-pastel.jpg` | John Raphael Smith (1800) / Wellcome Collection | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Edward_Jenner._Pastel_by_John_Raphael_Smith._Wellcome_L0026138.jpg |
+| 艾奎亚诺 | `frames/olaudah-equiano.jpg` | Daniel Orme after W. Denton (1789) / 大英图书馆 | CC0 | https://commons.wikimedia.org/wiki/File:Olaudah_Equiano_-_The_interesting_Narrative_of_the_Life_of_Olaudah_Equiano_(1789),_frontispiece_-_BL.jpg |
+| 玛丽·西科尔 | `frames/mary-seacole.jpg` | Albert Charles Challen (c. 1869) / 伦敦国家肖像馆 | 公有领域 | https://commons.wikimedia.org/wiki/File:Seacole_-_Challen.jpg |
+| 泰戈尔 | `frames/tagore.jpg` | 《Les Prix Nobel 1913》所刊照片（c. 1909） | 公有领域 | https://commons.wikimedia.org/wiki/File:Rabindranath_Tagore_in_1909.jpg |
+
+以上图片均经缩放与 JPEG 压缩，部分做了裁切（如郑和《麒麟图》只取下半幅）；CC BY / CC BY-SA 作品的改动版本沿用原许可。
 
 ## 字体
 
