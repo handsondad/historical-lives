@@ -23,11 +23,12 @@
 | `npm run check [-- <故事id> \| --stats]` | 检查故事规则、图片、字体缺字与三维度分布 |
 | `npm test` | 全部测试（数据结构、视图缩放、字体、配音完整性） |
 | `npm run story:new -- <id>` | 生成 `src/stories/<id>.ts` 骨架并注册到 `index.ts` |
+| `npm run story:index` | 重新生成 `src/stories/catalog.json`、`credits.json`、`aspects.json`（首页目录、署名、图片比例；`check`/`test` 会查是否过期） |
 | `npm run frames [-- <故事id>]` | 从 Wikimedia Commons 下载图片并生成缩略图（需 ffmpeg） |
 | `npm run grid -- <故事id \| 图片路径>` | 给图画十等分红网格（`tools/.cache/grid/`），读 `spot` 坐标 |
 | `npm run snapshot -- <home \| 故事id> [--spots] [--width 390]` | 无头浏览器截图到 `snapshots/` 自查 |
 | `npm run sheet -- <故事id>` | 把指了圈的截图拼成总览图核对 |
-| `npm run font` | 从站酷快乐体里截取网站用到的汉字（需 `python -m pip install fonttools`） |
+| `npm run font` | 从站酷快乐体里截取网站用到的汉字，输出 `public/fonts/story.woff2`（需 `python -m pip install fonttools brotli`） |
 | `npm run voice [-- <故事id>]` | 用 `edge-tts` 给新增/修改的台词配音（需联网、`edge-tts` 和 `ffmpeg`） |
 | `npm run build` | 生产构建，输出到 `dist/` |
 
@@ -38,8 +39,12 @@
 | 路由 | 页面 | 文件 |
 |---|---|---|
 | `#/` | 晾衣绳首页（领域 / 时期 / 地理） | `src/pages/LinePage.tsx`，分组与排版在 `src/pages/line.ts` |
-| `#/story/<id>/<n>` | 看图问答，讲到第 n 句（从 1 数） | `src/pages/StoryPage.tsx` |
+| `#/story/<id>/<n>` | 看图问答，讲到第 n 句（从 1 数） | `src/pages/StoryPage.tsx`（按需下载，见下） |
 
+- `src/App.tsx`：路由、`document.title`；故事页和这个故事的台词点开才下载，下载中/失败显示「正在翻开 / 再试一次」
+- `src/stories/catalog.ts`：`CARDS`（首页、地图、翻页用的精简目录）、`ASPECTS`（图片高/宽）、`Credit`；数据来自 `tools/story-index.mjs` 生成的三个 JSON
+- `src/stories/load.ts` + `src/pages/story-loader.ts`：按 id 懒加载单个故事文件（**文件名必须等于故事 id**，测试会查），首页看简介时就预取
+- **网页代码不要 import `src/stories/index.ts`**（那样会把全部台词打进首屏包）；它只给 `tools/` 和 `tests/` 用
 - `src/stories/types.ts`：`Story`、`Line`、`Spot`、`Frame`、`Field`、`EraId`、`Region`、`Expression`
 - `src/stories/lines.ts`：`nian()`、`dad()`、`spot()` 三个写台词小工具
 - `src/stories/<id>.ts` & `src/stories/index.ts`：故事数据与按年份排序清单
@@ -48,7 +53,7 @@
 - `src/components/WorldPin.tsx`：手绘风等距世界坐标小地图（支持 `coords` 与可选 `journey` 弧线）
 - `src/lib/year.ts`：`yearText`、`ERAS`（五个时期分界）、`eraOf`
 - `src/lib/voice.ts`、`src/lib/speech.ts`、`src/lib/voice-manifest.ts`：按台词指纹映射 MP3 配音与浏览器朗读回退
-- `tools/`：`new-story.mjs`、`check.mjs`、`fetch-frames.mjs`、`grid.mjs`、`snapshot.mjs`、`sheet.mjs`、`font.mjs`、`voice.mjs`
+- `tools/`：`new-story.mjs`、`story-index.mjs`、`check.mjs`、`fetch-frames.mjs`、`grid.mjs`、`snapshot.mjs`、`sheet.mjs`、`font.mjs`、`voice.mjs`
 - `tests/`：`line.test.mjs`、`stories.test.mjs`、`view.test.mjs`、`voice.test.mjs`
 - `skills/`：`add-life-story/`、`expand-collection/`（给代码助手的扩充流程与查资料模板）
 
@@ -59,7 +64,7 @@
 3. 查实史料、年代、`coords` 经纬度，并在 Wikimedia Commons 找公有领域或 CC 许可的真实图像（见 `skills/add-life-story/research-brief.md`）。
 4. 写完 `src/stories/<id>.ts`，跑 `npm run frames -- <id>` 下载图片和缩略图。
 5. 跑 `npm run grid -- <id>` 打开网格图读 `spot(x, y, r)`；改好后跑 `npm run snapshot -- <id> --spots` 和 `npm run sheet -- <id>` 眼看核对圈有没有圈准。
-6. 跑 `npm run font` 更新站酷快乐体子集，跑 `npm run voice -- <id>` 合成音频。
+6. 跑 `npm run font` 更新站酷快乐体子集，跑 `npm run voice -- <id>` 合成音频，跑 `npm run story:index` 更新首页目录、署名和图片比例。
 7. 登记图片来源到 `THIRD_PARTY_NOTICES.md`，更新 `README.md` 简介清单。
 8. 跑 `npm run typecheck && npm run check && npm test && npm run build`，再用 `--width 390` 截手机宽度自查。
 

@@ -3,7 +3,8 @@
  * 一开始只挂分类牌，点开一类后才把这一类的故事挂上绳子，同一时间只打开一类。
  */
 import { ERAS, eraOf } from "../lib/year.ts";
-import type { Field, Region, Story } from "../stories/types.ts";
+import type { StoryCard } from "../stories/catalog.ts";
+import type { Field, Region } from "../stories/types.ts";
 
 export type Mode = "field" | "era" | "region";
 
@@ -13,7 +14,7 @@ export type Group = {
   readonly icon: string;
   readonly color: string;
   readonly note: string;
-  readonly stories: readonly Story[];
+  readonly stories: readonly StoryCard[];
 };
 
 export const FIELD_LOOK: Record<Field, { readonly icon: string; readonly color: string; readonly note: string }> = {
@@ -37,7 +38,7 @@ export const REGION_LOOK: Record<Region, { readonly icon: string; readonly color
 };
 const REGION_ORDER = Object.keys(REGION_LOOK) as Region[];
 
-export function groupsOf(stories: readonly Story[], mode: Mode): Group[] {
+export function groupsOf(stories: readonly StoryCard[], mode: Mode): Group[] {
   const sorted = [...stories].sort((a, b) => a.year - b.year);
   if (mode === "field") {
     return FIELD_ORDER.map((f) => ({ f, list: sorted.filter((s) => s.field === f) }))
@@ -64,7 +65,7 @@ export function groupsOf(stories: readonly Story[], mode: Mode): Group[] {
 export type Slot =
   | { readonly kind: "tag"; readonly group: Group }
   | { readonly kind: "banner"; readonly group: Group }
-  | { readonly kind: "print"; readonly story: Story; readonly group: Group };
+  | { readonly kind: "print"; readonly story: StoryCard; readonly group: Group };
 
 export function slotsOf(groups: readonly Group[], open: string | null): Slot[] {
   return groups.flatMap((group): Slot[] => group.key === open

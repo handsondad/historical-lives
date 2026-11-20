@@ -1,7 +1,7 @@
 /* 与 storyverse / one-frame-one-story 同系列：站酷快乐体、暖色绘本底、3px 深棕描边、按下去的立体按钮 */
 @font-face {
   font-family: "StoryFont";
-  src: url("/fonts/story.woff") format("woff");
+  src: url("/fonts/story.woff2") format("woff2");
   font-display: block;
 }
 
@@ -249,7 +249,7 @@ a { color: var(--accent-blue-deep); }
 }
 .preview-frame { display: block; border-radius: 12px; overflow: hidden; background: #2b2520; border: 3px solid var(--ink); transition: transform 150ms; }
 .preview-frame:hover { transform: rotate(-1deg) scale(1.02); }
-.preview-frame img { width: 100%; max-height: 400px; object-fit: contain; margin: 0 auto; }
+.preview-frame img { width: 100%; height: auto; max-height: 400px; object-fit: contain; margin: 0 auto; }
 .preview-info h2 { margin: 2px 0 6px; font-size: 30px; font-weight: 400; color: var(--ink); line-height: 1.3; }
 .preview-when { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: #e0702a; font-size: 16px; }
 .preview-when .year { font-size: 26px; }
@@ -390,6 +390,8 @@ a { color: var(--accent-blue-deep); }
 .link-btn { border: 0; background: none; color: var(--text-secondary); font: inherit; font-size: 16px; cursor: pointer; padding: 0 6px; }
 .link-btn:hover { color: var(--ink); text-decoration: underline; }
 .link-btn:disabled { opacity: 0.35; cursor: default; text-decoration: none; }
+.story-wait { margin: 18vh auto 0; text-align: center; font-size: 20px; color: var(--text-secondary); animation: fade 300ms ease-out 400ms both; }
+.story-wait .link-btn { font-size: 20px; color: var(--ink); text-decoration: underline; }
 
 .ending { margin-top: 18px; display: grid; gap: 16px; animation: preview-in 400ms ease-out; }
 .remember {

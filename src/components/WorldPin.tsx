@@ -1,5 +1,6 @@
 import { journeyArcs, project } from "../lib/geo.ts";
-import type { Region, Story } from "../stories/types.ts";
+import type { StoryCard } from "../stories/catalog.ts";
+import type { Region } from "../stories/types.ts";
 
 /** 手绘绘本风世界大陆轮廓（含英伦三岛、地中海/阿拉伯/印度半岛、日本、东南亚与新西兰） */
 const LAND_PATHS = [
@@ -91,10 +92,10 @@ export function WorldPin({ place, region, coords, journey, compact = false }: Pr
 }
 
 type OverviewProps = {
-  stories: readonly Story[];
+  stories: readonly StoryCard[];
   activeId?: string;
   readIds: ReadonlySet<string>;
-  onSelect: (story: Story) => void;
+  onSelect: (story: StoryCard) => void;
 };
 
 /** 首页可展开的世界足迹总图：把全部人物坐标画在同一张手绘地图上 */

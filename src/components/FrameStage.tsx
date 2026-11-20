@@ -1,9 +1,11 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { viewFor } from "../lib/view.ts";
+import { ASPECTS } from "../stories/catalog.ts";
 import type { Frame, Spot } from "../stories/types.ts";
 
 const VB = 1000;
-const aspectCache = new Map<string, number>();
+// 先用 tools/story-index.mjs 量好的比例，图还没下完框子就是对的形状；图下完后换成精确值
+const aspectCache = new Map<string, number>(Object.entries(ASPECTS));
 
 function labelY(s: Spot, h: number, k: number) {
   const above = s.y * h - s.r * VB - 12 * k;
@@ -41,10 +43,11 @@ export function FrameStage({ frame, spots }: { frame: Frame; spots: readonly Spo
     <div className={frame.dark ? "frame-box dark" : "frame-box"}
       style={{ aspectRatio: `1 / ${a}`, ["--aspect" as string]: a }}>
       <div className="zoomer" style={{ transform: `translate(${view.x * 100}%, ${view.y * 100}%) scale(${view.scale})` }}>
-        <img ref={imgRef} src={frame.src} alt={frame.alt} draggable={false}
+        <img ref={imgRef} src={frame.src} alt={frame.alt} draggable={false} decoding="async"
           onLoad={(e) => {
             if (!e.currentTarget.naturalWidth) return;
             const ratio = e.currentTarget.naturalHeight / e.currentTarget.naturalWidth;
+            if (Math.abs(ratio - (aspectCache.get(frame.src) ?? 0)) < 1e-3) return;
             aspectCache.set(frame.src, ratio);
             setAspect(ratio);
           }} />

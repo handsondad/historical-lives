@@ -32,5 +32,5 @@ npm run check -- --stats
 2. 为每个故事跑 `npm run story:new -- <id>` 并填写数据。
 3. 统一跑 `npm run frames` 和 `npm run grid -- <id>`，逐张查看网格图调整 `spot` 与图像描述。
 4. 统一跑 `npm run snapshot -- <id> --spots` + `npm run sheet -- <id>` 检查圈点。
-5. 台词全部定稿后一次跑 `npm run font` 和 `npm run voice`。
+5. 台词全部定稿后一次跑 `npm run font`、`npm run voice` 和 `npm run story:index`。
 6. 更新 `THIRD_PARTY_NOTICES.md`、`README.md`，最后运行 `npm run typecheck && npm run check && npm test && npm run build`。

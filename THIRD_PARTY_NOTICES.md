@@ -31,4 +31,4 @@
 
 ## 字体
 
-- 站酷快乐体（ZCOOL KuaiLe）：SIL Open Font License (OFL)，子集生成于 `public/fonts/story.woff`，许可文本见 `public/fonts/OFL.txt`。
+- 站酷快乐体（ZCOOL KuaiLe）：SIL Open Font License (OFL)，子集生成于 `public/fonts/story.woff2`，许可文本见 `public/fonts/OFL.txt`。

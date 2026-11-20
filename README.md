@@ -20,9 +20,10 @@ npm run dev
 | `npm run check [-- <故事id> \| --stats]` | 检查故事规则、图片、字体与领域/时期/地理分布 |
 | `npm test` | 检查故事数据、分组布局、字体与配音完整性 |
 | `npm run story:new -- <id>` | 生成新人物故事骨架并自动注册 |
+| `npm run story:index` | 重新生成首页目录、图片署名与图片比例（`src/stories/*.json`） |
 | `npm run build` | 生产构建，输出到 `dist/`（相对路径，可部署到任意子路径） |
 | `npm run frames` | 从 Wikimedia Commons 下载图片并生成缩略图（需 ffmpeg） |
-| `npm run font` | 从站酷快乐体里截取网站用到的汉字（需 `python -m pip install fonttools`） |
+| `npm run font` | 从站酷快乐体里截取网站用到的汉字，输出 woff2（需 `python -m pip install fonttools brotli`） |
 | `npm run voice [-- <故事id>]` | 用 edge-tts 为台词配音（小念 `zh-CN-YunxiaNeural`，爸爸 `zh-CN-YunxiNeural`） |
 | `npm run snapshot -- <home \| 故事id> [--spots] [--width 390]` | 无头浏览器截图到 `snapshots/` 自查 |
 | `npm run grid -- <故事id>` | 给图片叠加十等分网格以核对 `spot` 坐标 |

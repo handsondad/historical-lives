@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
-import { dirname, resolve } from "node:path";
+import { readdirSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { STORIES } from "../src/stories/index.ts";
+import { staleIndex } from "../tools/story-index.mjs";
 import { validateStory } from "../tools/story-rules.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -16,6 +18,17 @@ test("故事 id 唯一，只用小写字母、数字和短横线", () => {
 test("故事从早到晚排", () => {
   const years = STORIES.map((s) => s.year);
   assert.deepEqual(years, [...years].sort((a, b) => a - b));
+});
+
+test("每个故事文件名就是故事 id（网页按 id 找文件下载）", () => {
+  const files = readdirSync(join(root, "src/stories"))
+    .filter((f) => f.endsWith(".ts") && !["index.ts", "types.ts", "lines.ts", "load.ts", "catalog.ts"].includes(f))
+    .map((f) => f.replace(/\.ts$/, ""));
+  assert.deepEqual(files.sort(), STORIES.map((s) => s.id).sort());
+});
+
+test("catalog.json / credits.json / aspects.json 跟故事对得上（不对就跑 npm run story:index）", () => {
+  assert.deepEqual(staleIndex(), []);
 });
 
 for (const story of STORIES) {

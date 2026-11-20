@@ -20,7 +20,7 @@ description: >-
 - [ ] 3. npm run frames -- <id> 下载图片与缩略图，人工看一遍图是否适合儿童
 - [ ] 4. npm run grid -- <id> 读坐标，调整 spot(x, y, r)
 - [ ] 5. npm run snapshot -- <id> --spots && npm run sheet -- <id> 核对所有圈
-- [ ] 6. npm run font && npm run voice -- <id> 生成字体子集与配音
+- [ ] 6. npm run font && npm run voice -- <id> && npm run story:index 生成字体子集、配音与首页目录
 - [ ] 7. 更新 THIRD_PARTY_NOTICES.md 与 README.md
 - [ ] 8. npm run typecheck && npm run check && npm test && npm run build
 ```
@@ -71,7 +71,10 @@ npm run sheet -- <id>
 ```bash
 npm run font
 npm run voice -- <id>
+npm run story:index
 ```
+
+`story:index` 把简介、主图、署名和图片比例写进 `src/stories/catalog.json`、`credits.json`、`aspects.json`；改了 `teaser`、年份、坐标或换了图都要重跑，否则 `npm run check` / `npm test` 会报过期。
 
 更新 `THIRD_PARTY_NOTICES.md` 和 `README.md`，最后跑通全套检查：
 

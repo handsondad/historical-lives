@@ -9,6 +9,7 @@ import { FIELD_LOOK, REGION_LOOK } from "../src/pages/line.ts";
 import { STORIES, storyById } from "../src/stories/index.ts";
 import { CHARS_FILE, collect, needsStoryFont } from "./font.mjs";
 import { validateStory } from "./story-rules.mjs";
+import { staleIndex } from "./story-index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -41,6 +42,9 @@ if (!targets.length && fontChars) {
   const missing = [...new Set([...collect()].filter((ch) => needsStoryFont(ch) && !fontChars.has(ch)))];
   if (missing.length) errors.push(`[全站字体] 字体子集缺字（请跑 npm run font）：${missing.join("")}`);
 }
+
+const stale = staleIndex();
+if (stale.length) errors.push(`[目录] src/stories/ 下 ${stale.join("、")} 过期了（请跑 npm run story:index）`);
 
 if (!targets.length || statsOnly) {
   const count = (keys, fn) => keys.map((k) => `${k}:${STORIES.filter((s) => fn(s) === k).length}`).join("  ");

@@ -7,7 +7,7 @@ import { canSpeak, preloadClip, speak } from "../lib/speech.ts";
 import { framesOf, resolveFrames, resolveLooks } from "../lib/view.ts";
 import { clipUrl } from "../lib/voice.ts";
 import { eraMeta, eraOf, yearText } from "../lib/year.ts";
-import { STORIES } from "../stories/index.ts";
+import { CARDS } from "../stories/catalog.ts";
 import type { Speaker, Story } from "../stories/types.ts";
 import { lineMemory } from "./lineMemory.ts";
 
@@ -47,6 +47,16 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
   useEffect(() => {
     history.replaceState(null, "", `#/story/${story.id}/${step + 1}`);
   }, [story.id, step]);
+
+  // 下一句要换图的话先把图下好，翻过去不用等
+  const upcoming = frames[step + 1];
+  useEffect(() => {
+    if (upcoming && upcoming !== frames[step]) {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = upcoming.src;
+    }
+  }, [upcoming, frames, step]);
 
   const go = useCallback((to: number) => {
     setPinned(null);
@@ -123,9 +133,9 @@ export function StoryPage({ story, initialStep }: { story: Story; initialStep: n
     mounted.current = true;
   }, [step]);
 
-  const index = STORIES.findIndex((s) => s.id === story.id);
-  const prev = STORIES[index - 1];
-  const next = STORIES[index + 1];
+  const index = CARDS.findIndex((s) => s.id === story.id);
+  const prev = CARDS[index - 1];
+  const next = CARDS[index + 1];
 
   return (
     <div className="app story-page" data-snap data-lines={story.lines.length}>

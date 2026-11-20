@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { Avatar } from "../components/Avatar.tsx";
 import { WorldOverview, WorldPin } from "../components/WorldPin.tsx";
 import { loadReadIds } from "../lib/progress.ts";
-import { framesOf, thumbOf } from "../lib/view.ts";
+import { thumbOf } from "../lib/view.ts";
 import { yearText } from "../lib/year.ts";
-import { STORIES } from "../stories/index.ts";
-import type { Story } from "../stories/types.ts";
+import { ASPECTS, CARDS, type Credit, type StoryCard } from "../stories/catalog.ts";
 import { groupsOf, layout, NARROW, slotKey, slotsOf, WIDE, type Group, type Mode } from "./line.ts";
 import { lineMemory } from "./lineMemory.ts";
+import { prefetchStory } from "./story-loader.ts";
 import { useDragScroll } from "./useDragScroll.ts";
 
 const MODES: { id: Mode; label: string }[] = [
@@ -35,7 +35,7 @@ export function LinePage() {
   const [open, setOpen] = useState(lineMemory.open);
   const [showMap, setShowMap] = useState(false);
   const [readIds] = useState<ReadonlySet<string>>(() => loadReadIds());
-  const groups = useMemo(() => groupsOf(STORIES, mode), [mode]);
+  const groups = useMemo(() => groupsOf(CARDS, mode), [mode]);
   const slots = useMemo(() => slotsOf(groups, open), [groups, open]);
   const { items, width } = useMemo(() => layout(slots, size, room), [slots, size, room]);
   const keys = slots.map(slotKey);
@@ -89,12 +89,12 @@ export function LinePage() {
     setPicked(null);
     setPeek(null);
   };
-  const pickOrOpen = (s: Story) => {
+  const pickOrOpen = (s: StoryCard) => {
     setMapStoryId(null);
     if (chosen === `s:${s.id}`) location.hash = `#/story/${s.id}`;
     else setPicked(`s:${s.id}`);
   };
-  const selectFromMap = (s: Story) => {
+  const selectFromMap = (s: StoryCard) => {
     setMapStoryId(s.id);
     const group = groups.find((g) => g.stories.some((item) => item.id === s.id));
     if (group) {
@@ -129,8 +129,8 @@ export function LinePage() {
   });
   const rope = `M ${size.pad / 2},${size.top} Q ${width / 2},${size.top + size.sag * 2} ${width - size.pad / 2},${size.top}`;
   const shownGroup = shown?.startsWith("g:") ? groups.find((g) => `g:${g.key}` === shown) : undefined;
-  const shownStory = (mapStoryId ? STORIES.find((s) => s.id === mapStoryId) : undefined)
-    ?? (shown?.startsWith("s:") ? STORIES.find((s) => `s:${s.id}` === shown) : undefined);
+  const shownStory = (mapStoryId ? CARDS.find((s) => s.id === mapStoryId) : undefined)
+    ?? (shown?.startsWith("s:") ? CARDS.find((s) => `s:${s.id}` === shown) : undefined);
   const openGroup = groups.find((g) => g.key === open);
   const lineClass = size === NARROW ? "line compact" : "line";
   const railClass = [
@@ -159,7 +159,7 @@ export function LinePage() {
             ))}
           </div>
           <nav className="crumbs" aria-label="现在打开的一类">
-            <button className={openGroup ? "" : "here"} onClick={() => { setOpen(null); setPicked(null); setMapStoryId(null); }}>全部 {STORIES.length} 个故事</button>
+            <button className={openGroup ? "" : "here"} onClick={() => { setOpen(null); setPicked(null); setMapStoryId(null); }}>全部 {CARDS.length} 个故事</button>
             {openGroup && (
               <>
                 <span className="sep" aria-hidden="true">›</span>
@@ -172,7 +172,7 @@ export function LinePage() {
           <div className="line-tools">
             {readIds.size > 0 && (
               <span className="read-progress" title="已经听完的故事数量">
-                ⭐ 已听 {readIds.size}/{STORIES.length}
+                ⭐ 已听 {readIds.size}/{CARDS.length}
               </span>
             )}
             <button
@@ -188,7 +188,7 @@ export function LinePage() {
 
         {showMap && (
           <WorldOverview
-            stories={STORIES}
+            stories={CARDS}
             activeId={shownStory?.id}
             readIds={readIds}
             onSelect={selectFromMap}
@@ -302,11 +302,14 @@ function GroupPreview({ group, isOpen, readIds, onToggle }: {
   );
 }
 
-function Preview({ story, read }: { story: Story; read: boolean }) {
+function Preview({ story, read }: { story: StoryCard; read: boolean }) {
+  // 看着简介的时候就把问答先下好，点进去不用等
+  useEffect(() => prefetchStory(story.id), [story.id]);
+  const aspect = ASPECTS[story.frame.src] ?? 1;
   return (
     <article className="preview" key={story.id} aria-live="polite">
       <a className="preview-frame" href={`#/story/${story.id}`} aria-label={`进入问答故事：${story.title}`}>
-        <img src={story.frame.src} alt={story.frame.alt} />
+        <img src={story.frame.src} alt={story.frame.alt} width={1000} height={Math.round(1000 * aspect)} decoding="async" />
       </a>
       <div className="preview-info">
         <p className="preview-when">
@@ -327,18 +330,30 @@ function Preview({ story, read }: { story: Story; read: boolean }) {
 }
 
 function Credits() {
+  // 署名清单一般没人点开，点开时才加载
+  const [credits, setCredits] = useState<readonly Credit[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const load = () => {
+    if (credits) return;
+    setFailed(false);
+    import("../stories/credits.json").then((m) => setCredits(m.default as readonly Credit[]), () => setFailed(true));
+  };
   return (
-    <details className="credits">
+    <details className="credits" onToggle={(e) => { if (e.currentTarget.open) load(); }}>
       <summary>图片与史料说明</summary>
       <p>小念和爸爸的问答根据公开史料与传记改写；人物画像与历史照片来自 Wikimedia Commons，许可附在每一项后。</p>
-      <ul>
-        {STORIES.flatMap((s) => framesOf(s).map((f) => (
-          <li key={f.src}>
-            <strong>{f === s.frame ? s.person : f.title}</strong>（{yearText(s)}）：{f.by}。{f.license}。
-            <a href={f.page} target="_blank" rel="noreferrer">出处</a>
-          </li>
-        )))}
-      </ul>
+      {credits ? (
+        <ul>
+          {credits.map((f) => (
+            <li key={f.src}>
+              <strong>{f.name}</strong>（{yearText(f)}）：{f.by}。{f.license}。
+              <a href={f.page} target="_blank" rel="noreferrer">出处</a>
+            </li>
+          ))}
+        </ul>
+      ) : failed
+        ? <p>清单没有加载出来，<button type="button" className="link-btn" onClick={load}>再试一次</button></p>
+        : <p>正在翻清单……</p>}
     </details>
   );
 }
