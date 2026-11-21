@@ -217,7 +217,7 @@ export function LinePage() {
                         <span className="tag-icon" aria-hidden="true">{g.icon}</span>
                         <span className="tag-name">{g.name}</span>
                         <span className="tag-stack" aria-hidden="true">
-                          {g.stories.slice(0, 4).map((s) => <img key={s.id} className="mini" src={thumbOf(s.frame.src)} alt="" draggable={false} loading="lazy" />)}
+                          {g.stories.slice(0, 4).map((s) => <Mini key={s.id} story={s} photo={false} />)}
                         </span>
                         <span className="tag-count">{g.stories.length} 个 · 点开</span>
                       </span>
@@ -274,6 +274,13 @@ export function LinePage() {
   );
 }
 
+/** 分类牌和分类卡片上的小圆片。收起的分类只写人名的第一个字（photo=false）：首页一打开不用先下一堆图，点开哪一类再读哪一类 */
+function Mini({ story, photo }: { story: StoryCard; photo: boolean }) {
+  return photo
+    ? <img className="mini" src={thumbOf(story.frame.src)} alt="" draggable={false} loading="lazy" />
+    : <span className="mini letter">{story.person.slice(0, 1)}</span>;
+}
+
 function GroupPreview({ group, isOpen, readIds, onToggle }: {
   group: Group;
   isOpen: boolean;
@@ -283,7 +290,8 @@ function GroupPreview({ group, isOpen, readIds, onToggle }: {
   return (
     <article className="preview group-preview" key={group.key} style={tone(group)} aria-live="polite">
       <div className="mosaic" aria-hidden="true">
-        {group.stories.slice(0, 6).map((s) => <img key={s.id} className="mini" src={thumbOf(s.frame.src)} alt="" loading="lazy" />)}
+        {group.stories.slice(0, 6).map((s) => <Mini key={s.id} story={s} photo={isOpen} />)}
+        {!isOpen && <span className="mosaic-hint">挂上晾衣绳，图才显出来</span>}
       </div>
       <div className="preview-info">
         <h2>{group.icon} {group.name}</h2>
